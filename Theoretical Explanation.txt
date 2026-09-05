@@ -1,0 +1,93 @@
+===================================================================
+THE PROBLEM
+------------------------------------------------
+Find the shortest path from S (start) to G (goal) on a grid
+where some cells are blocked ('#'). Movement is restricted to
+up, down, left, and right (no diagonal movement).
+
+
+A* SEARCH
+------------------------------------------------
+A* explores the grid outward from the start, but instead of
+expanding blindly (like BFS), it always expands the most
+promising cell next -- the one with the lowest estimated total
+cost:
+
+    f(n) = g(n) + h(n)
+
+    g(n) - actual cost from S to n
+           (in this code, just the number of steps taken so
+           far, since each move costs 1)
+
+    h(n) - estimated cost from n to G
+           (never exact, just a guess)
+
+    f(n) - best estimate of total path cost if the path goes
+           through n
+
+
+THE HEURISTIC - MANHATTAN DISTANCE
+------------------------------------------------
+Since diagonal moves aren't allowed, the fastest possible route
+between two cells is:
+
+    h(n) = |row1 - row2| + |col1 - col2|
+
+This heuristic never overestimates the true distance, which
+makes it admissible -- and that is the mathematical guarantee
+that A* will find the truly shortest path, not just a
+good-enough one.
+
+
+THE PRIORITY QUEUE (HEAP)
+------------------------------------------------
+Rather than checking every cell equally, the algorithm keeps a
+min-heap of candidate cells ordered by f(n), so the
+cheapest-looking option is always popped first.
+
+A tie-breaking counter is pushed alongside f_score in the heap
+entry -- (f_score, counter, position) -- so Python never has to
+compare two grid coordinate tuples directly when their f_score
+values are equal.
+
+
+BOOKKEEPING STRUCTURES
+------------------------------------------------
+g_score     - cheapest confirmed cost to reach each cell so far
+
+came_from   - parent pointer for each cell, used to rebuild the
+              final path once the goal is reached
+
+closed_set  - cells that are already finalized, so they are not
+              reprocessed
+
+
+TERMINATION
+------------------------------------------------
+The main loop ends in one of two ways:
+
+  1. The goal is popped off the heap.
+     -> Path found. Reconstructed by walking backward through
+        came_from, then reversing the list so it reads
+        Start -> Goal.
+
+  2. The heap becomes empty without ever reaching the goal.
+     -> No path exists. The function returns None for the path.
+
+
+WHY THIS MATTERS FOR THE PROJECT
+------------------------------------------------
+This structure guarantees a search that is both:
+
+  - Optimal  -- because the Manhattan distance heuristic never
+               overestimates the true cost, A* is guaranteed to
+               return the shortest possible path.
+
+  - Complete -- because every reachable cell is eventually
+               considered, A* will always find a path if one
+               exists, and will correctly report failure if one
+               does not.
+
+================================================================
+END OF DOCUMENT
+================================================================
